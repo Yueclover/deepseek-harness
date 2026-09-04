@@ -32,6 +32,10 @@ peerDependencyRules:
 allowBuilds:
   esbuild: true
   lefthook: true
+  # Native shell for the Windows desktop application.
+  electron: true
+  # Native HID access for desktop input providers.
+  node-hid: true
   # Cross-platform boundary for the persistent PTY backend, including ConPTY on Windows.
   node-pty: true
   # Pulled in by @earendil-works/pi-ai (optional LLM API backend). pnpm lists

@@ -133,6 +133,19 @@ flowchart LR
   svc_e2b["ctx.e2b<br/>E2B sandbox lifecycle owner"]
   pkg_fs_e2b["fs-e2b"]
   pkg_subprocess_e2b["subprocess-e2b"]
+  pkg_desktop_bridge["desktop-bridge"]
+  svc_desktopBridge["ctx.desktopBridge<br/>Desktop process bridge seam"]
+  pkg_desktop_bridge_child_process["desktop-bridge-child-process"]
+  pkg_screenshot_desktop["screenshot-desktop"]
+  pkg_desktop_input["desktop-input"]
+  svc_desktopInput["ctx.desktopInput<br/>Desktop input registry"]
+  pkg_desktop_input_mimouse_hid["desktop-input-mimouse-hid"]
+  pkg_screenshot_assistant["screenshot-assistant"]
+  pkg_screenshot["screenshot"]
+  svc_screenshot["ctx.screenshot<br/>Interactive screenshot seam"]
+  pkg_screenshot_target["screenshot-target"]
+  svc_screenshotTargets["ctx.screenshotTargets<br/>Screenshot target registry"]
+  pkg_screenshot_target_dsh_agent["screenshot-target-dsh-agent"]
   pkg_subprocess["subprocess"]
   svc_subprocess["ctx.subprocess<br/>Subprocess seam"]
   pkg_subprocess_local["subprocess-local"]
@@ -249,6 +262,10 @@ flowchart LR
   pkg_credentials --> svc_credentials
   pkg_credentials_local --> svc_credentials
   pkg_deepseek_llm_api_extensions --> svc_deepseekLlmApiExtensions
+  pkg_desktop_bridge --> svc_desktopBridge
+  pkg_desktop_bridge_child_process --> svc_desktopBridge
+  pkg_desktop_input --> svc_desktopInput
+  pkg_desktop_input_mimouse_hid --> svc_desktopInput
   pkg_e2b --> svc_e2b
   pkg_experimental_agent_team --> svc_agentTeams
   pkg_experimental_code_runtime_python --> svc_codeRuntime
@@ -281,6 +298,10 @@ flowchart LR
   pkg_sandbox --> svc_sandbox
   pkg_sandbox_local --> svc_sandbox
   pkg_sandbox_policy --> svc_sandboxPolicy
+  pkg_screenshot --> svc_screenshot
+  pkg_screenshot_desktop --> svc_screenshot
+  pkg_screenshot_target --> svc_screenshotTargets
+  pkg_screenshot_target_dsh_agent --> svc_screenshotTargets
   pkg_session --> svc_sessions
   pkg_session_log_deepseek --> svc_deepseekLlmApiExtensions
   pkg_session_persistence --> svc_sessionPersistence
@@ -361,6 +382,8 @@ flowchart LR
   svc_credentials --> pkg_llm_deepseek
   svc_credentials --> pkg_llm_pi_ai
   svc_deepseekLlmApiExtensions --> pkg_llm_deepseek
+  svc_desktopBridge --> pkg_screenshot_desktop
+  svc_desktopInput --> pkg_screenshot_assistant
   svc_directoryPicker --> pkg_api_workspace_controller
   svc_dynamicCordisRunner --> pkg_tool_cordis
   svc_e2b --> pkg_fs_e2b
@@ -383,6 +406,8 @@ flowchart LR
   svc_sandboxPolicy --> pkg_bash_sandbox
   svc_sandboxPolicy --> pkg_fs_sandbox
   svc_sandboxPolicy --> pkg_terminal_bash
+  svc_screenshot --> pkg_screenshot_assistant
+  svc_screenshotTargets --> pkg_screenshot_assistant
   svc_sessionPersistence --> pkg_agent_loop
   svc_sessionPersistence --> pkg_hooks_claude_code
   svc_sessionPersistence --> pkg_hooks_codex
@@ -511,6 +536,10 @@ flowchart LR
 | `ctx.agentLoop` | `bundle` | [`agent-loop`](../packages/core/agent-loop) | - | [`base`](../packages/bundle/base), [`sdk-minimal`](../packages/bundle/sdk-minimal) | - | 唯一的具体循环插件；扩展包依赖 dsh-agent 的事件和服务，而不依赖此包。 |
 | `ctx.goals` | `core` | [`goal`](../packages/goal/goal) | - | - | - | 从会话日志折叠带修订版本的目标状态，并将实时延续激活保留在进程本地。 |
 | `ctx.e2b` | `core` | [`e2b`](../packages/e2b/e2b) | - | [`fs-e2b`](../packages/e2b/fs-e2b), [`subprocess-e2b`](../packages/e2b/subprocess-e2b) | - | 拥有一个共享的 E2B SDK 句柄、远程工作目录和最终沙箱处置，使两个基础 E2B 提供方处于同一个 Linux 运行时中。 |
+| `ctx.desktopBridge` | `seam` | [`desktop-bridge`](../packages/desktop/bridge) | [`desktop-bridge-child-process`](../packages/desktop/bridge-child-process) | [`screenshot-desktop`](../packages/desktop/screenshot-desktop) | - | 在 Harness Host 与 Electron 持有的操作系统能力 handler 之间路由带类型、可取消的请求。 |
+| `ctx.desktopInput` | `seam` | [`desktop-input`](../packages/desktop/input) | [`desktop-input-mimouse-hid`](../packages/desktop/input-mimouse-hid) | [`screenshot-assistant`](../packages/desktop/screenshot-assistant) | - | 归一化设备控制、识别短按和长按手势，并分派绑定到 effect 生命周期的语义动作。 |
+| `ctx.screenshot` | `seam` | [`screenshot`](../packages/desktop/screenshot) | [`screenshot-desktop`](../packages/desktop/screenshot-desktop) | [`screenshot-assistant`](../packages/desktop/screenshot-assistant) | - | 提供交互式区域捕获与操作系统剪贴板操作，不包含硬件绑定或投递目标。 |
+| `ctx.screenshotTargets` | `seam` | [`screenshot-target`](../packages/desktop/screenshot-target) | [`screenshot-target-dsh-agent`](../packages/desktop/screenshot-target-dsh-agent) | [`screenshot-assistant`](../packages/desktop/screenshot-assistant) | - | 注册可独立安装的投递目标，并只把用户确认的截图发送到 settings 选择的准确目标。 |
 | `ctx.subprocess` | `seam` | [`subprocess`](../packages/subprocess/subprocess) | [`subprocess-local`](../packages/subprocess/subprocess-local), [`subprocess-e2b`](../packages/e2b/subprocess-e2b) | [`bash-local`](../packages/shell/bash-local), [`bash-sandbox`](../packages/shell/bash-sandbox), [`terminal-bash`](../packages/terminal/terminal-bash), [`lsp-stdio`](../packages/lsp/lsp-stdio), [`subagent-acp`](../packages/subagent/subagent-acp), [`subagent-codex`](../packages/subagent/subagent-codex), [`subagent-claude-code`](../packages/subagent/subagent-claude-code) | - | Bash 执行器、PTY shell 后端、LSP Host，以及进程外 ACP、Codex 和 Claude Code subagent 后端都通过 ctx.subprocess 执行 spawn；该服务负责进程坐标、进程树／会话生命周期、stdio 处置、终端机制和 kill 升级。 |
 | `ctx.shell` | `seam` | [`shell`](../packages/shell/shell) | [`bash-local`](../packages/shell/bash-local), [`bash-sandbox`](../packages/shell/bash-sandbox), [`pwsh-local`](../packages/shell/pwsh-local) | [`tool-bash`](../packages/shell/tool-bash), [`tool-pwsh`](../packages/shell/tool-pwsh), [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex) | - | 面向模型的 shell 工具和钩子桥接消费此 seam；沙箱、远程或 PowerShell 执行器可以替换 bash-local，而无需改动这些消费方。 |
 | `ctx.shellEnv` | `core` | [`shell-env`](../packages/shell/shell-env) | - | [`tool-bash`](../packages/shell/tool-bash), [`tool-pwsh`](../packages/shell/tool-pwsh) | - | 插件声明限定于 effect 作用域的 DSH_* 事实；每个 shell 工具在每次执行时收集一份可信快照，其执行器据此重建命名空间。 |

@@ -1,0 +1,27 @@
+- insert:
+    - id: desktop-input
+      name: '../../desktop/input/src/index.ts'
+    - id: desktop-input-mimouse-hid
+      name: '../../desktop/input-mimouse-hid/src/index.ts'
+      disabled: !!js process.env.DSH_DESKTOP_SCREENSHOT === '0' || process.env.DSH_MIMOUSE_SCREENSHOT === '0'
+    - id: desktop-bridge
+      name: '../../desktop/bridge-child-process/src/index.ts'
+    - id: screenshot
+      name: '../../desktop/screenshot-desktop/src/index.ts'
+      disabled: !!js process.env.DSH_DESKTOP_SCREENSHOT === '0'
+    - id: screenshot-targets
+      name: '../../desktop/screenshot-target/src/index.ts'
+      disabled: !!js process.env.DSH_DESKTOP_SCREENSHOT === '0'
+    - id: screenshot-target-dsh-agent
+      name: '../../desktop/screenshot-target-dsh-agent/src/index.ts'
+      disabled: !!js process.env.DSH_DESKTOP_SCREENSHOT === '0'
+    - id: screenshot-assistant
+      name: '@deepseek-ai/dsh-screenshot-assistant'
+      disabled: !!js process.env.DSH_DESKTOP_SCREENSHOT === '0'
+      config:
+        defaultTargetId: dsh-agent
+        inputDeviceId: '*'
+        inputControlId: mimouse.screenshot
+    - id: screenshot-ui
+      name: '../../client/ui-screenshot/src/index.ts'
+      disabled: !!js process.env.DSH_DESKTOP_SCREENSHOT === '0'

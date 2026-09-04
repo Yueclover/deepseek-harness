@@ -48,7 +48,7 @@ Each qualifying Loader entry contributes its generated host-face reflection and 
 
 ### Observable behavior and failures
 
-Packages without the export are skipped silently. Resolution verdicts and imported manifests are cached for the process lifetime, so adding a `./typert` export requires a restart. A malformed artifact among already-mounted entries fails activation loudly; a later failure is logged per package without preventing unrelated packages from registering. An explicit `packages` entry that cannot be resolved from the config tree, or that lacks the export, fails loudly and names the package.
+Packages without the export are skipped silently. When the source-development loader resolves a package outside the config tree's Node dependency search, this plugin locates the nearest owning package manifest and imports its built `./typert` artifact. Resolution verdicts and imported manifests are cached for the process lifetime, so adding a `./typert` export requires a restart. A malformed artifact among already-mounted entries fails activation loudly; a later failure is logged per package without preventing unrelated packages from registering. An explicit `packages` entry that cannot be resolved from the config tree or the source-development loader, or that lacks the export, fails loudly and names the package.
 
 -----
 

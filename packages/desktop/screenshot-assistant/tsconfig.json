@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": { "rootDir": "src", "outDir": "lib/types", "types": ["node"] },
+  "include": ["src"],
+  "references": [
+    { "path": "../../../vendor/cosmokit" },
+    { "path": "../../../vendor/cordis" },
+    { "path": "../../../vendor/schemastery" },
+    { "path": "../../../packages/util/brand" },
+    { "path": "../../../packages/settings/settings" },
+    { "path": "../../../packages/core/session" },
+    { "path": "../../../packages/typert/protocol" },
+    { "path": "../input" },
+    { "path": "../screenshot" },
+    { "path": "../screenshot-target" }
+  ]
+}

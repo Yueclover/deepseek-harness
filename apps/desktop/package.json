@@ -1,0 +1,35 @@
+{
+  "name": "@deepseek-ai/dsh-desktop-app",
+  "description": "Electron desktop carrier for the dsh desktop profile and generic operating-system capabilities",
+  "version": "0.1.2-rc.1",
+  "publishConfig": { "access": "public" },
+  "repository": { "type": "git", "url": "git+https://github.com/deepseek-ai/deepseek-harness.git", "directory": "apps/desktop" },
+  "type": "module",
+  "main": "lib/main.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/main.js"
+    }
+  },
+  "files": [
+    "lib/main.js",
+    "lib/types/**/*.d.ts"
+  ],
+  "scripts": {
+    "start": "node scripts/start.mjs"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh": "workspace:^",
+    "@deepseek-ai/dsh-desktop-bridge": "workspace:^"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "workspace:^",
+    "@types/node": "^22.20.0",
+    "electron": "44.1.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  },
+  "peerDependencies": { "@deepseek-ai/cordis": "workspace:^" }
+}

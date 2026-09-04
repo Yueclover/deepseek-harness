@@ -329,6 +329,17 @@
     { "path": "./packages/lsp/lsp" },
     { "path": "./packages/lsp/lsp-stdio" },
     { "path": "./packages/lsp/tool-lsp" },
-    { "path": "./apps/cli" }
+    { "path": "./packages/desktop/bridge" },
+    { "path": "./packages/desktop/bridge-child-process" },
+    { "path": "./packages/desktop/input" },
+    { "path": "./packages/desktop/input-mimouse-hid" },
+    { "path": "./packages/desktop/screenshot" },
+    { "path": "./packages/desktop/screenshot-desktop" },
+    { "path": "./packages/desktop/screenshot-target" },
+    { "path": "./packages/desktop/screenshot-target-dsh-agent" },
+    { "path": "./packages/desktop/screenshot-assistant" },
+    { "path": "./packages/bundle/desktop-screenshot" },
+    { "path": "./apps/cli" },
+    { "path": "./apps/desktop" }
   ]
 }

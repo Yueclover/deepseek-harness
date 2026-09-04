@@ -28,7 +28,7 @@
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import type {} from '@deepseek-ai/cordis-plugin-loader'
@@ -47,6 +47,41 @@ export const inject = ['typert', 'loader']
 export interface Config {
   /** Exact npm package names that must resolve and export `./typert`. */
   packages?: string[]
+}
+
+/** Return whether a specifier names an npm package root rather than a file, builtin, or subpath. */
+function isPackageRootSpecifier(specifier: string): boolean {
+  const segments = specifier.split('/')
+  return specifier.startsWith('@') ? segments.length === 2 : segments.length === 1 && !specifier.includes(':')
+}
+
+/** Find the package manifest owning an entry resolved by the source-development loader. */
+function sourcePackageManifest(ctx: Context, pkgName: string): string | undefined {
+  if (!isPackageRootSpecifier(pkgName)) return undefined
+  const internal = ctx.loader.internal
+  if (internal === undefined || ctx.baseUrl === undefined) return undefined
+  let url: string
+  try {
+    url = internal.version === 'v1'
+      ? internal.resolveSync(pkgName, ctx.baseUrl, {}).url
+      : internal.resolveSync(ctx.baseUrl, { specifier: pkgName, attributes: {} }).url
+  } catch {
+    return undefined
+  }
+  if (!url.startsWith('file:')) return undefined
+  let directory = dirname(fileURLToPath(url))
+  while (true) {
+    const candidate = join(directory, 'package.json')
+    try {
+      const manifest = JSON.parse(readFileSync(candidate, 'utf8')) as { name?: unknown }
+      if (manifest.name === pkgName) return candidate
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    }
+    const parent = dirname(directory)
+    if (parent === directory) return undefined
+    directory = parent
+  }
 }
 
 /** Validate explicit package names and default to Loader-entry discovery only. */
@@ -319,16 +354,20 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
     try {
       pkgPath = require.resolve(`${pkgName}/package.json`)
     } catch (cause) {
-      if (configured.has(pkgName)) {
+      const sourceManifest = sourcePackageManifest(ctx, pkgName)
+      if (sourceManifest !== undefined) {
+        pkgPath = sourceManifest
+      } else if (configured.has(pkgName)) {
         throw new Error(
           `typert-loader: configured package "${pkgName}" cannot be resolved from the config tree — add it to the composition package dependencies or remove it from packages`,
           { cause },
         )
+      } else {
+        // Not a resolvable package root: loader builtins (cordis:include) and
+        // subpath entries land here — permanently not a typert contributor.
+        artifactPath.set(pkgName, null)
+        return null
       }
-      // Not a resolvable package root: loader builtins (cordis:include) and
-      // subpath entries land here — permanently not a typert contributor.
-      artifactPath.set(pkgName, null)
-      return null
     }
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as Record<string, unknown>
     const rel = typertExportOf(pkgName, pkg.exports)

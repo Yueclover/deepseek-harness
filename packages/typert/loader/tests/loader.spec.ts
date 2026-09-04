@@ -170,6 +170,45 @@ describe('typert loader', () => {
     expect(ctx.typert.local.get('goals/create')).toBeUndefined()
   })
 
+  it('discovers a workspace source package through the exposed loader resolver', LOADER_TEST_TIMEOUT, async () => {
+    root = await mkdtemp(join(tmpdir(), 'dsh-typert-loader-'))
+    await linkZod(root)
+    const sourceDir = join(root, 'source-package')
+    const entryPath = join(sourceDir, 'index.js')
+    await mkdir(sourceDir, { recursive: true })
+    await writeFile(join(sourceDir, 'package.json'), JSON.stringify({
+      name: '@fixture/source-only',
+      type: 'module',
+      exports: {
+        '.': './index.js',
+        './typert': './typert.host.js',
+        './package.json': './package.json',
+      },
+    }))
+    await writeFile(entryPath, 'export function apply() {}\n')
+    await writeFile(join(sourceDir, 'typert.host.js'), typertSource('@fixture/source-only', 'SourceOnly'))
+    const ctx = await boot()
+    const entryUrl = pathToFileURL(entryPath).href
+    ctx.loader.internal = {
+      version: 'v2',
+      async import(specifier: string): Promise<unknown> {
+        if (specifier !== '@fixture/source-only') throw new Error(`unexpected fixture import ${specifier}`)
+        const imported: unknown = await import(entryUrl)
+        return imported
+      },
+      resolveSync(_parentURL: string, request: { specifier: string }) {
+        if (request.specifier !== '@fixture/source-only') throw new Error(`unexpected fixture resolve ${request.specifier}`)
+        return { format: 'module' as const, url: entryUrl }
+      },
+    } as unknown as NonNullable<typeof ctx.loader.internal>
+
+    await ctx.loader.create({ name: '@fixture/source-only' })
+    await ctx.loader.await()
+    await mountTypertLoader(ctx)
+
+    expect(ctx.typert.get('@fixture/source-only#SourceOnly')).toBeDefined()
+  })
+
   it('fails loud when an explicit package is absent or has no Typert export', LOADER_TEST_TIMEOUT, async () => {
     root = await mkdtemp(join(tmpdir(), 'dsh-typert-loader-'))
     await writePackage(root, '@fixture/plain')

@@ -776,6 +776,49 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'desktopBridge',
+    summary: 'Host-facing access to capabilities registered by the attached Desktop shell.',
+    description: 'Host-facing access to capabilities registered by the attached Desktop shell.',
+    methods: [
+      {
+        signature: 'abstract request<K extends DesktopBridgeRequestName>( method: K, payload: RequestOf<K>, signal?: AbortSignal, ): Promise<ResponseOf<K>>',
+        description: 'Send one typed request to the Desktop shell.',
+        parameters: [{ name: 'method', description: 'Registered Desktop method.' }, { name: 'payload', description: 'Method payload.' }, { name: 'signal', description: 'Optional cancellation signal.' }],
+        returns: 'The Desktop response.',
+      },
+      {
+        signature: 'abstract on<K extends DesktopBridgeEventName>( event: K, listener: (payload: DesktopBridgeEventMap[K]) => void, ): () => void',
+        description: 'Subscribe to one typed Desktop event.',
+        parameters: [{ name: 'event', description: 'Registered event name.' }, { name: 'listener', description: 'Event recipient.' }],
+        returns: 'A subscription disposer.',
+      },
+    ],
+  },
+  {
+    key: 'desktopInput',
+    summary: 'Shared Desktop input service; providers publish controls and business plugins own mappings.',
+    description: 'Shared Desktop input service; providers publish controls and business plugins own mappings.',
+    methods: [
+      {
+        signature: 'registerAction(id: InputActionId, handler: InputActionHandler): () => void',
+        description: 'Register one semantic action until the returned disposer runs.',
+        parameters: [{ name: 'id', description: 'Unique semantic action id.' }, { name: 'handler', description: 'Action event handler.' }],
+        returns: 'The idempotent registration disposer.',
+      },
+      {
+        signature: 'registerBinding(binding: InputBinding): () => void',
+        description: 'Register one binding contribution without replacing other business plugins\' mappings.',
+        parameters: [{ name: 'binding', description: 'Physical control to semantic action mapping.' }],
+        returns: 'The idempotent registration disposer.',
+      },
+      {
+        signature: 'publish(event: DesktopInputEvent): void',
+        description: 'Publish one normalized provider event. Action failures are contained.',
+        parameters: [{ name: 'event', description: 'Provider event to recognize and dispatch.' }],
+      },
+    ],
+  },
+  {
     key: 'directoryPicker',
     summary: 'Abstract directory-picking service.',
     description: 'Abstract directory-picking service. Subclass, implement `capability()`, and load the subclass as a plugin — it registers as `ctx.directoryPicker` (one implementation per context; loading a second throws, cordis\' standard duplicate-service behavior). The capability object must be stable for the service lifetime: consumers may capture it across calls.',
@@ -1326,6 +1369,48 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Read the session override without applying the deployment default.',
         parameters: [{ name: 'session', description: 'session whose log supplies the override.' }],
         returns: 'the last logged mode, or `undefined` without one.',
+      },
+    ],
+  },
+  {
+    key: 'screenshot',
+    summary: 'Interactive screenshot capability used by Desktop inputs and other consumers.',
+    description: 'Interactive screenshot capability used by Desktop inputs and other consumers.',
+    methods: [
+      {
+        signature: 'abstract capture(request: ScreenshotCaptureRequest, signal?: AbortSignal): Promise<ScreenshotCaptureResult>',
+        description: 'Open one capture interaction.',
+        parameters: [{ name: 'request', description: 'Interactive capture request.' }, { name: 'signal', description: 'Optional cancellation signal.' }],
+        returns: 'The terminal capture result.',
+      },
+      {
+        signature: 'abstract copyToClipboard(image: ScreenshotImage, signal?: AbortSignal): Promise<void>',
+        description: 'Write a captured PNG to the operating-system clipboard.',
+        parameters: [{ name: 'image', description: 'Validated captured PNG.' }, { name: 'signal', description: 'Optional cancellation signal.' }],
+      },
+    ],
+  },
+  {
+    key: 'screenshotTargets',
+    summary: 'Live registry used by the assistant and its settings page.',
+    description: 'Live registry used by the assistant and its settings page.',
+    methods: [
+      {
+        signature: 'register(target: ScreenshotTarget): () => void',
+        description: 'Register one target until the returned disposer runs.',
+        parameters: [{ name: 'target', description: 'Named screenshot destination.' }],
+        returns: 'The idempotent registration disposer.',
+      },
+      {
+        signature: 'list(): readonly Pick<ScreenshotTarget, \'id\' | \'displayName\'>[]',
+        description: 'Return the installed targets in registration order.',
+        parameters: [],
+        returns: 'Target ids and display names.',
+      },
+      {
+        signature: 'async send(id: ScreenshotTargetId, request: ScreenshotTargetRequest, signal: AbortSignal): Promise<void>',
+        description: 'Deliver to the exact configured target without silently selecting another provider.',
+        parameters: [{ name: 'id', description: 'Exact configured target id.' }, { name: 'request', description: 'Captured image and delivery context.' }, { name: 'signal', description: 'Delivery cancellation signal.' }],
       },
     ],
   },
@@ -3837,6 +3922,26 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type DeepSeekLlmApiJson = null | boolean | number | string | DeepSeekLlmApiJson[] | {\n    [key: string]: DeepSeekLlmApiJson;\n};',
   },
   {
+    name: 'DesktopBridgeEventMap',
+    declaration: 'export interface DesktopBridgeEventMap {\n}',
+  },
+  {
+    name: 'DesktopBridgeEventName',
+    declaration: 'export type DesktopBridgeEventName = Extract<keyof DesktopBridgeEventMap, string>;',
+  },
+  {
+    name: 'DesktopBridgeRequestMap',
+    declaration: 'export interface DesktopBridgeRequestMap {\n}',
+  },
+  {
+    name: 'DesktopBridgeRequestName',
+    declaration: 'export type DesktopBridgeRequestName = Extract<keyof DesktopBridgeRequestMap, string>;',
+  },
+  {
+    name: 'DesktopInputEvent',
+    declaration: 'export type DesktopInputEvent = {\n    readonly type: \'button\';\n    readonly deviceId: InputDeviceId;\n    readonly controlId: InputControlId;\n    readonly pressed: boolean;\n} | {\n    readonly type: \'disconnected\';\n    readonly deviceId: InputDeviceId;\n};',
+  },
+  {
     name: 'DiffCallView',
     declaration: 'export interface DiffCallView {\n    card: \'diff\';\n    title: string;\n    diffs: FileDiff[];\n    locations?: FileLocation[];\n}',
   },
@@ -4103,6 +4208,42 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'IndexInjectionPlacement',
     declaration: 'export type IndexInjectionPlacement = \'head\' | \'body\';',
+  },
+  {
+    name: 'InputActionEvent',
+    declaration: 'export interface InputActionEvent {\n    readonly pressId: InputPressId;\n    readonly gesture: \'press\' | \'hold\';\n    readonly phase: \'trigger\' | \'release\' | \'cancel\';\n    readonly heldMs: number;\n    readonly source: InputSource;\n}',
+  },
+  {
+    name: 'InputActionHandler',
+    declaration: 'export type InputActionHandler = (event: InputActionEvent) => void | Promise<void>;',
+  },
+  {
+    name: 'InputActionId',
+    declaration: 'export type InputActionId = Branded<\'InputActionId\'>;',
+  },
+  {
+    name: 'InputBinding',
+    declaration: 'export type InputBinding = {\n    readonly id: InputBindingId;\n    readonly deviceId: InputDeviceId | \'*\';\n    readonly controlId: InputControlId;\n    readonly gesture: \'press\';\n    readonly actionId: InputActionId;\n} | {\n    readonly id: InputBindingId;\n    readonly deviceId: InputDeviceId | \'*\';\n    readonly controlId: InputControlId;\n    readonly gesture: \'hold\';\n    readonly actionId: InputActionId;\n    readonly holdMs: number;\n};',
+  },
+  {
+    name: 'InputBindingId',
+    declaration: 'export type InputBindingId = Branded<\'InputBindingId\'>;',
+  },
+  {
+    name: 'InputControlId',
+    declaration: 'export type InputControlId = Branded<\'InputControlId\'>;',
+  },
+  {
+    name: 'InputDeviceId',
+    declaration: 'export type InputDeviceId = Branded<\'InputDeviceId\'>;',
+  },
+  {
+    name: 'InputPressId',
+    declaration: 'export type InputPressId = Branded<\'InputPressId\'>;',
+  },
+  {
+    name: 'InputSource',
+    declaration: 'export interface InputSource {\n    readonly kind: \'mouse\' | \'keyboard\';\n    readonly deviceId: InputDeviceId;\n    readonly controlId: InputControlId;\n}',
   },
   {
     name: 'InspectorId',
@@ -4719,6 +4860,34 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'ScopeKey',
     declaration: 'export type ScopeKey = object;',
+  },
+  {
+    name: 'ScreenshotCaptureId',
+    declaration: 'export type ScreenshotCaptureId = Branded<\'ScreenshotCaptureId\'>;',
+  },
+  {
+    name: 'ScreenshotCaptureRequest',
+    declaration: 'export interface ScreenshotCaptureRequest {\n    captureId: ScreenshotCaptureId;\n    mode: \'region\';\n    annotations: boolean;\n}',
+  },
+  {
+    name: 'ScreenshotCaptureResult',
+    declaration: 'export type ScreenshotCaptureResult = {\n    kind: \'captured\';\n    captureId: ScreenshotCaptureId;\n    image: ScreenshotImage;\n    prompt?: string;\n} | {\n    kind: \'cancelled\';\n    captureId: ScreenshotCaptureId;\n};',
+  },
+  {
+    name: 'ScreenshotImage',
+    declaration: 'export interface ScreenshotImage {\n    mediaType: \'image/png\';\n    data: Uint8Array;\n    width: number;\n    height: number;\n}',
+  },
+  {
+    name: 'ScreenshotTarget',
+    declaration: 'export interface ScreenshotTarget {\n    readonly id: ScreenshotTargetId;\n    readonly displayName: string;\n    send(request: ScreenshotTargetRequest, signal: AbortSignal): Promise<void>;\n}',
+  },
+  {
+    name: 'ScreenshotTargetId',
+    declaration: 'export type ScreenshotTargetId = Branded<\'ScreenshotTargetId\'>;',
+  },
+  {
+    name: 'ScreenshotTargetRequest',
+    declaration: 'export interface ScreenshotTargetRequest {\n    readonly image: ScreenshotImage;\n    readonly prompt: string;\n    readonly sessionId?: SessionId;\n    readonly source: \'composer\' | \'hardware\' | \'shortcut\';\n}',
   },
   {
     name: 'SearchFileMatches',

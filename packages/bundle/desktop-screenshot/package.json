@@ -1,0 +1,36 @@
+{
+  "name": "@deepseek-ai/dsh-desktop-screenshot",
+  "description": "Windows desktop screenshot assistant composition for DeepSeek Harness",
+  "version": "0.1.2-rc.1",
+  "publishConfig": { "access": "public" },
+  "repository": { "type": "git", "url": "git+https://github.com/deepseek-ai/deepseek-harness.git", "directory": "packages/bundle/desktop-screenshot" },
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": { "types": "./lib/types/index.d.ts", "default": "./lib/index.js" },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "files": ["lib/index.js", "cordis.patch.yml", "lib/types/**/*.d.ts"],
+  "license": "MIT",
+  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } },
+  "dependencies": {
+    "@deepseek-ai/dsh-client-ui-screenshot": "workspace:^",
+    "@deepseek-ai/dsh-desktop-bridge-child-process": "workspace:^",
+    "@deepseek-ai/dsh-desktop-input": "workspace:^",
+    "@deepseek-ai/dsh-desktop-input-mimouse-hid": "workspace:^",
+    "@deepseek-ai/dsh-screenshot-desktop": "workspace:^",
+    "@deepseek-ai/dsh-screenshot-assistant": "workspace:^",
+    "@deepseek-ai/dsh-screenshot-target": "workspace:^",
+    "@deepseek-ai/dsh-screenshot-target-dsh-agent": "workspace:^"
+  },
+  "peerDependencies": { "@deepseek-ai/cordis": "workspace:^" },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "workspace:^",
+    "@deepseek-ai/cordis-plugin-include": "workspace:^",
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^4.2.0"
+  }
+}

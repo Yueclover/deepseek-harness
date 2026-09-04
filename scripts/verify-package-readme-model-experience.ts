@@ -44,6 +44,17 @@ const NO_MODEL_EXPERIENCE_SECTION: Readonly<Record<string, string>> = {
  * blocks. A package moves on or off this list with its context behavior.
  */
 const SENTENCE_MODEL_EXPERIENCE: Readonly<Record<string, SentenceContract>> = {
+  'packages/bundle/desktop-screenshot': { kind: 'indirect', reason: 'The bundle is a patch-list carrier; the selected screenshot target owns model-visible delivery.' },
+  'packages/client/ui-screenshot': { kind: 'indirect', reason: 'The browser control delegates capture and delivery to the Host screenshot assistant.' },
+  'packages/desktop/bridge': { kind: 'none', reason: 'The process transport registers no model-facing content.' },
+  'packages/desktop/bridge-child-process': { kind: 'none', reason: 'The child-process provider only connects the shared transport.' },
+  'packages/desktop/input': { kind: 'none', reason: 'Input normalization and action dispatch register no model-facing content.' },
+  'packages/desktop/input-mimouse-hid': { kind: 'none', reason: 'The HID provider only publishes normalized physical input.' },
+  'packages/desktop/screenshot': { kind: 'indirect', reason: 'The screenshot service delegates model delivery to screenshot target consumers.' },
+  'packages/desktop/screenshot-assistant': { kind: 'indirect', reason: 'The assistant delegates model-visible delivery to the configured screenshot target.' },
+  'packages/desktop/screenshot-desktop': { kind: 'indirect', reason: 'The capture provider delegates model delivery to screenshot target consumers.' },
+  'packages/desktop/screenshot-target': { kind: 'indirect', reason: 'The registry delegates model-visible delivery to the selected target provider.' },
+  'packages/desktop/screenshot-target-dsh-agent': { kind: 'indirect', reason: 'The provider submits an ordinary image-bearing user message through sessionController.' },
   'packages/attachment/attachment': { kind: 'indirect', reason: 'The storage seam delegates model request rendering to provider adapters.' },
   'packages/attachment/attachment-local': { kind: 'indirect', reason: 'The local backend delegates model request rendering to provider adapters.' },
   'packages/shell/shell': { kind: 'indirect', reason: 'The service interface delegates all model rendering to dsh-tool-bash.' },

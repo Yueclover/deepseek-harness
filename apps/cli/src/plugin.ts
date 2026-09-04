@@ -131,7 +131,10 @@ export function runPlugin(profile: string, args: readonly string[]): number {
   const before = readProfileManifest(NAME, dir)
   // Windows resolves pnpm through its .cmd shim, which spawn() refuses
   // without a shell since the CVE-2024-27980 hardening.
-  const result = spawnSync('pnpm', args.map(argument => anchorPathSpec(argument, process.cwd())), {
+  const result = spawnSync('pnpm', [
+    '--workspace-root',
+    ...args.map(argument => anchorPathSpec(argument, process.cwd())),
+  ], {
     cwd: dir,
     stdio: 'inherit',
     shell: process.platform === 'win32',

@@ -18,7 +18,8 @@ packages/    @deepseek-ai/dsh-<pkg> workspaces at packages/<group>/<pkg>/
   typert/      type graph generator, loader, and runtime registry
   llm/         LLM capability: Service Definition/Consumer + DeepSeek providers
   e2b/         E2B POC: sandbox + FS/subprocess adapters
-  shell/        bash capability: Service Definition + local/pwsh providers + shell Consumers
+  shell/        bash and pwsh capability family
+  desktop/      bridge, input, screenshots
   subprocess/  subprocess capability + local process-tree provider + shared Win32 library
   terminal/         persistent sessions
   fs/          filesystem capability + policy
